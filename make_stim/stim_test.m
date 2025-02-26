@@ -1,0 +1,52 @@
+clear
+
+i=4;
+s=serialport("COM3",460800);
+configureTerminator(s,"CR");
+LED_stim_all=readmatrix("LED_stim_all.csv");
+XYZ_sens=readmatrix("XYZ_sens.csv");
+ipRGC_sens=readmatrix("ipRGC_sens.csv");
+ALL_coefficient_multi=readmatrix("ALL_coefficient_multi2.csv");
+stim=LED_stim_all(i,:);
+writeline(s,make_ASCII(stim));
+X=0;Y=0;Z=0;ipRGC=0;
+X_after=0;Y_after=0;Z_after=0;ipRGC_after=0;
+stim_ones=[stim 1];
+spectrum=stim_ones*(ALL_coefficient_multi');
+Object_calib=readmatrix("Object_calib.csv");
+for j=1:391
+    X=X+spectrum(j)*XYZ_sens(1,j);
+    Y=Y+spectrum(j)*XYZ_sens(2,j);
+    Z=Z+spectrum(j)*XYZ_sens(3,j);
+    ipRGC=ipRGC+spectrum(j)*ipRGC_sens(j);
+end
+x=X/(X+Y+Z);
+y=Y/(X+Y+Z);
+fprintf('Object\n');
+fprintf('Y = %.5f\n', Y);
+fprintf('x = %.5f\n', x);
+fprintf('y = %.5f\n', y);
+fprintf('ipRGC = %.5f\n', ipRGC);
+Object_calib(i,1)=Y;Object_calib(i,2)=x;Object_calib(i,3)=y;Object_calib(i,4)=ipRGC;
+pause(2.5);
+[CIEXY CIEUV Luminance Lambda Radiance irrad] = SpectroCALMakeSPDMeasurement("COM4",390, 780, 1, 1000, 5);
+
+for j=1:391
+    X_after=X_after+Radiance(j)*XYZ_sens(1,j);
+    Y_after=Y_after+Radiance(j)*XYZ_sens(2,j);
+    Z_after=Z_after+Radiance(j)*XYZ_sens(3,j);
+    ipRGC_after=ipRGC_after+Radiance(j)*ipRGC_sens(j);
+end
+x_after=X_after/(X_after+Y_after+Z_after);
+y_after=Y_after/(X_after+Y_after+Z_after);
+fprintf('Calibration\n');
+fprintf('Y = %.5f\n', Y_after);
+fprintf('x = %.5f\n', x_after);
+fprintf('y = %.5f\n', y_after);
+fprintf('ipRGC = %.5f\n', ipRGC_after);
+Object_calib(i,5)=Y_after;Object_calib(i,6)=x_after;Object_calib(i,7)=y_after;Object_calib(i,8)=ipRGC_after;
+writematrix(Object_calib,"Object_calib.csv");
+
+
+
+

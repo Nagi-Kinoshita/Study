@@ -1,0 +1,44 @@
+clear
+LED_stim=zeros([1 22]);
+LED_stim_2=zeros([1 22]);
+%LED_40_stim=readmatrix('LED_8_times_5_intensity2.csv');
+%LED_40_stim=readmatrix('LED_40_stim1_true.csv');
+%LED_40_stim=readmatrix('LED_8_times_5_intensity_ipRGC.csv');
+%LED_40_stim=readmatrix('LED_8_times_5_intensity.csv');
+%LED_40_stim_2=readmatrix('memo.csv');
+%LED_8_stim=readmatrix('LED_intensity_scale_all.csv');
+%LED_8_stim=readmatrix('LED_intensity_scale_all_new.csv');
+%LED_20_stim=readmatrix("LED_stim_1.csv");
+%LED_20_stim=readmatrix("LED_stim_2.csv");
+LED_20_stim=readmatrix("LED_high_stim.csv");
+S_out=zeros([8 5]);
+M_out=zeros([8 5]);
+L_out=zeros([8 5]);
+Rod_out=zeros([8 5]);
+X=zeros([8 5]);
+Y=zeros([8 5]);
+Z=zeros([8 5]);
+ipRGC_out=zeros([8 5]);
+ipRGC_magnification=zeros([8 5]);
+syou=0;
+amari=0;
+XYZ=zeros([3 8]);
+for i=1:20
+    for j=1:26
+        LED_stim(j)=LED_20_stim(i,j);
+    end
+    S_M_L_Rod_ipRGC_out=calculate_cell_out(LED_stim);
+    X_Y_Z_lum=calculate_X_Y_Z_lum(LED_stim);
+    [syou,amari]=quorem(sym(i-1),sym(4));
+    S_out(syou+1,amari+1)=S_M_L_Rod_ipRGC_out(1);
+    M_out(syou+1,amari+1)=S_M_L_Rod_ipRGC_out(2);
+    L_out(syou+1,amari+1)=S_M_L_Rod_ipRGC_out(3);
+    Rod_out(syou+1,amari+1)=S_M_L_Rod_ipRGC_out(4);
+    ipRGC_out(syou+1,amari+1)=S_M_L_Rod_ipRGC_out(5);
+    X(syou+1,amari+1)=X_Y_Z_lum(1);
+    Y(syou+1,amari+1)=X_Y_Z_lum(2);
+    Z(syou+1,amari+1)=X_Y_Z_lum(3);
+    Lum(syou+1,amari+1)=X_Y_Z_lum(4);
+    x(syou+1,amari+1)=X(syou+1,amari+1)/(X(syou+1,amari+1)+Y(syou+1,amari+1)+Z(syou+1,amari+1));
+    y(syou+1,amari+1)=Y(syou+1,amari+1)/(X(syou+1,amari+1)+Y(syou+1,amari+1)+Z(syou+1,amari+1)); 
+end
